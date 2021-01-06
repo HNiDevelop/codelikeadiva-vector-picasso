@@ -1,7 +1,9 @@
+const { NormalModuleReplacementPlugin } = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const projectSettings = require('./project.settings.js');
+const express = require('express');
 
 const pluginHtml = new HtmlWebpackPlugin({
   template: './src/index.html',
@@ -14,6 +16,9 @@ const pluginHtml = new HtmlWebpackPlugin({
 const pluginExtractSass = new ExtractTextPlugin({
   filename: '[name].css'
 });
+
+const pluginNormalModuleReplacement = new NormalModuleReplacementPlugin(/\/iconv-loader$/, 'node-noop');
+
 
 module.exports = {
   entry: [
@@ -62,9 +67,15 @@ module.exports = {
   },
   plugins: [
     pluginHtml,
-    pluginExtractSass
+    pluginExtractSass,
+    pluginNormalModuleReplacement
   ],
   devServer: {
-    contentBase: './dist'
+    contentBase: './dist',
+    setup(app) {
+      app.use('/api',
+        express.static(path.resolve(__dirname, './src/public/data/'))
+      )
+    }
   },
 };
